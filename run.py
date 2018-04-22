@@ -5,6 +5,7 @@ from dbClasses import *
 from pyClasses import *
 from reviewFunctions import *
 from helperFunctions import *
+import logging
 import consts
 
 connect(
@@ -43,7 +44,8 @@ def hello():
         reviewState = updateAddReview(parsed, pyreview)
 
         message = determineMessage(pyreview, newUser, reviewState)
-    except:
+    except Exception as e:
+        logging.error("error: " + str(e))
         message = "Uh oh, I encountered an issue, please try again!"
 
     # Put it in a TwiML response

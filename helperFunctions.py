@@ -26,3 +26,11 @@ def determineMessage(pyreview, newUser, reviewState):
     else:
         message = "I couldn't understand what you said, text me 'Help' to view what you can send me."
     return message
+
+def titleFormat(s):
+    exceptions = ['a', 'an', 'of', 'the', 'is']
+    word_list = s.split()
+    final = [word_list[0].capitalize()]
+    for word in word_list[1:]:
+        final.append(word if word in exceptions else word.capitalize())
+    return " ".join(final)

@@ -1,4 +1,4 @@
-from helperFunctions import isfloat
+from helperFunctions import isfloat, titleFormat
 from dbClasses import *
 
 def parseReview(body, review):
@@ -6,12 +6,12 @@ def parseReview(body, review):
     if isfloat(bodyList[0]) and len(bodyList) > 1:
         review.rating = float(bodyList[0])
         titleList = bodyList[1:]
-        review.title = " ".join(titleList)
+        review.title = titleFormat(" ".join(titleList))
         return True
     elif isfloat(bodyList[-1]) and len(bodyList) > 1:
         review.rating = float(bodyList[-1])
         titleList = bodyList[:-1]
-        review.title = " ".join(titleList)
+        review.title = titleFormat(" ".join(titleList))
         return True
     return False
 
@@ -30,7 +30,7 @@ def updateAddReview(parsed, pyreview):
                 rating=pyreview.rating
             ).save()
             return "new"
-    elif pyreview.rating < 0.0 or pyreview.rating > 10.0:
+    elif pyreview.rating is None or pyreview.rating < 0.0 or pyreview.rating > 10.0:
         return "rating err"
     else:
         return None
