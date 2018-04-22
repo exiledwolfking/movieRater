@@ -3,8 +3,8 @@ from pymongo.write_concern import WriteConcern
 
 class User(MongoModel):
 	phone = fields.CharField(primary_key=True, max_length=11, min_length=11)
-	first_name = fields.CharField()
-	last_name = fields.CharField()
+	firstName = fields.CharField()
+	lastName = fields.CharField()
 
 	class Meta:
 		connection_alias = 'my-atlas-app'
@@ -22,7 +22,7 @@ class History(MongoModel):
 class Review(MongoModel):
 	phone = fields.ReferenceField(User)
 	media = fields.CharField()
-	rating = fields.IntegerField(max_value=10, min_value=0)
+	rating = fields.FloatField(max_value=10, min_value=0)
 	
 	class Meta:
 		connection_alias = 'my-atlas-app'
