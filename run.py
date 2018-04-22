@@ -52,18 +52,15 @@ def hello():
     resp = MessagingResponse()
     resp.message(message)
 	
-    print(request.values.get('Body'))
-    print(request.values.get('To')[1:])
-    print(request.values.get('From')[1:])
     # for p in request.form.lists(): print p
-    # {movie name} {rating}
-    # {rating} {movie name}
-    # {rating} {tv show name} {season} {episode}
-    # {rating} {season} {episode} {tv show name}
-    # {season} {episode} {rating} {tv show name}
+    # {movie name} {rating} # movie can't have num at start
+    # {rating} {movie name} # movie can't have num at end
+    # {rating} {tv show name} {season} {episode} 
+    # {rating} {season} {episode} {tv show name} rating must be double
+    # {season} {episode} {rating} {tv show name} rating must be double
     # {season} {episode} {tv show name} {rating}
-    # {tv show name} {rating} {season} {episode}
-    # {tv show name} {season} {episode} {rating}
+    # {tv show name} {rating} {season} {episode} rating must be double
+    # {tv show name} {season} {episode} {rating} rating must be double
 
     return str(resp)
 
