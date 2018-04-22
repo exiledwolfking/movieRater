@@ -1,8 +1,10 @@
 from flask import Flask, request, session
 from twilio.twiml.messaging_response import MessagingResponse
 from pymodm import connect
-from dbClasses import User, Review, History
-from pyClasses import pyUser, pyReview, pyHistory
+from dbClasses import *
+from pyClasses import *
+from reviewFunctions import *
+from helperFunctions import *
 import consts
 
 connect(
@@ -15,56 +17,52 @@ SECRET_KEY = consts.SECRET_KEY
 app = Flask(__name__)
 app.config.from_object(__name__)
 
-def isfloat(value):
-    try:
-        float(value)
-        return True
-    except ValueError:
-        return False
-
 
 @app.route("/", methods=['GET', 'POST'])
 def hello():
     """Respond with the number of text messages sent between two parties."""
-    #pyuser = pyUser()
-    #pyreview = pyReview()
-    #pyhistory = pyHistory()
 
-    from_number = request.values.get('From')
-    from_number = from_number[1:]
-    body = request.values.get('Body')
+    textNumber = request.values.get('From')
+    textNumber = textNumber[1:]
+    textBody = request.values.get('Body')
+    newUser = False
+    reviewState = None;
     
-    bodyList = body.split()
-    rating = -1
-    if isfloat(bodyList[0]):
-        print( bodyList[0] )
-        rating = float(bodyList[0])
-        titleList = bodyList[1:]
-        title = " ".join(titleList)
-    
-    users = list(User.objects.raw({'phone': from_number}))
+    pyreview = pyReview(textNumber)
+    pyhistory = pyHistory(textNumber, textBody)
+
+    users = list(User.objects.raw({'_id': pyreview.phone}))
     if len(users) == 0:
+        newUser = True
         user = User(
-            phone=from_number,
-            firstName=" ",
-            lastName=" "
+            phone=pyreview.phone,
+            firstName=None,
+            lastName=None
         ).save()
-    
-    reviews = list(Review.objects.raw({'phone': from_number, 'media': title}))
-    if len(reviews) == 1 and rating != -1:
-         review = reviews[0]
-         review.rating = rating
-         review.save()
-    elif rating != -1:
-        review = Review(
-            phone=from_number,
-            media=title,
-            rating=rating
-        ).save()
+
+    parsed = parseReview(textBody, pyreview)
+
+    if pyreview.title is not None:
+        reviews = list(Review.objects.raw({'phone': pyreview.phone, 'title': pyreview.title}))
+        if len(reviews) == 1 and pyreview.rating != -1:
+             review = reviews[0]
+             review.rating = pyreview.rating
+             review.save()
+             reviewState = "updated"
+        elif pyreview.rating != -1:
+            review = Review(
+                phone=pyreview.phone,
+                title=pyreview.title,
+                rating=pyreview.rating
+            ).save()
+            reviewState = "new"
+            
+    message = determineMessage(pyreview, newUser, reviewState)
+
 
     # Put it in a TwiML response
     resp = MessagingResponse()
-    resp.message("Done")
+    resp.message(message)
 	
     print(request.values.get('Body'))
     print(request.values.get('To')[1:])

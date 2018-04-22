@@ -2,7 +2,7 @@ import datetime
 
 class pyUser(object):
 	
-	def __init__(self, phone, firstName=" ", lastName=" "):
+	def __init__(self, phone, firstName=None, lastName=None):
 		self.phone = phone
 		self.firstName = firstName
 		self.lastName = lastName
@@ -16,7 +16,7 @@ class pyHistory(object):
 		
 class pyReview(object):
 	
-	def __init__(self, phone, media, rating):
+	def __init__(self, phone, title=None, rating=None):
 		self.phone = phone
-		self.media = media
+		self.title = title
 		self.rating = rating
