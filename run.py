@@ -40,10 +40,11 @@ def hello():
                 lastName=None
             ).save()
 
-        parsed = parseReview(textBody, pyreview)
-        reviewState = updateAddReview(parsed, pyreview)
+        processState = parseReview(textBody, pyreview)
+        if processState == 'valid':
+            processState = updateAddReview(processState, pyreview)
 
-        message = determineMessage(pyreview, newUser, reviewState)
+        message = determineMessage(pyreview, newUser, processState)
     except Exception as e:
         logging.error("error: " + str(e))
         message = "Uh oh, I encountered an issue, please try again!"
