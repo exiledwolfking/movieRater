@@ -1,0 +1,8 @@
+consts.py
+*.pyc
+bin/*
+local/*
+lib/*
+include/*
+ngrok
+pip-selfcheck.json
