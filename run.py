@@ -21,44 +21,30 @@ app.config.from_object(__name__)
 @app.route("/", methods=['GET', 'POST'])
 def hello():
     """Respond with the number of text messages sent between two parties."""
+    try:
+        textNumber = request.values.get('From')
+        textNumber = textNumber[1:]
+        textBody = request.values.get('Body')
+        newUser = False
 
-    textNumber = request.values.get('From')
-    textNumber = textNumber[1:]
-    textBody = request.values.get('Body')
-    newUser = False
-    reviewState = None;
-    
-    pyreview = pyReview(textNumber)
-    pyhistory = pyHistory(textNumber, textBody)
+        pyreview = pyReview(textNumber)
+        pyhistory = pyHistory(textNumber, textBody)
 
-    users = list(User.objects.raw({'_id': pyreview.phone}))
-    if len(users) == 0:
-        newUser = True
-        user = User(
-            phone=pyreview.phone,
-            firstName=None,
-            lastName=None
-        ).save()
-
-    parsed = parseReview(textBody, pyreview)
-
-    if pyreview.title is not None:
-        reviews = list(Review.objects.raw({'phone': pyreview.phone, 'title': pyreview.title}))
-        if len(reviews) == 1 and pyreview.rating != -1:
-             review = reviews[0]
-             review.rating = pyreview.rating
-             review.save()
-             reviewState = "updated"
-        elif pyreview.rating != -1:
-            review = Review(
+        users = list(User.objects.raw({'_id': pyreview.phone}))
+        if len(users) == 0:
+            newUser = True
+            user = User(
                 phone=pyreview.phone,
-                title=pyreview.title,
-                rating=pyreview.rating
+                firstName=None,
+                lastName=None
             ).save()
-            reviewState = "new"
-            
-    message = determineMessage(pyreview, newUser, reviewState)
 
+        parsed = parseReview(textBody, pyreview)
+        reviewState = updateAddReview(parsed, pyreview)
+
+        message = determineMessage(pyreview, newUser, reviewState)
+    except:
+        message = "Uh oh, I encountered an issue, please try again!"
 
     # Put it in a TwiML response
     resp = MessagingResponse()
