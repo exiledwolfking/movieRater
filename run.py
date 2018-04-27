@@ -54,12 +54,12 @@ def hello():
     resp.message(message)
 	
     # for p in request.form.lists(): print p
-    # {movie name} {rating} # movie can't have num at start
-    # {rating} {movie name} # movie can't have num at end
-    # {rating} {tv show name} {season} {episode} 
-    # {rating} {season} {episode} {tv show name} rating must be double
-    # {season} {episode} {rating} {tv show name} rating must be double
-    # {season} {episode} {tv show name} {rating}
+    # {movie name} {rating} # movie can't have num at start DONE
+    # {rating} {movie name} # movie can't have num at end DONE
+    # {rating} {tv show name} {season} {episode} DONE
+    # {rating} {season} {episode} {tv show name} rating must be double DONE
+    # {season} {episode} {rating} {tv show name} rating must be double DONE
+    # {season} {episode} {tv show name} {rating} DONE
     # {tv show name} {rating} {season} {episode} rating must be double
     # {tv show name} {season} {episode} {rating} rating must be double
 

@@ -16,7 +16,9 @@ class pyHistory(object):
 		
 class pyReview(object):
 	
-	def __init__(self, phone, title=None, rating=None):
+	def __init__(self, phone, title=None, rating=None, season=None, episode=None):
 		self.phone = phone
 		self.title = title
 		self.rating = rating
+        self.season = season
+        self.episode = episode

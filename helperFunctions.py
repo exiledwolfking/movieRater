@@ -9,8 +9,8 @@ def determineMessage(pyreview, newUser, processState):
     ratingErr = 'You entered an invalid rating! Please enter a number between 0 and 10. '
     ratingErr += 'You can enter decimal numbers (5.6, 7.7, 8.3, etc).'
     
-    undeterminedNum = 'Looks like your movie review has a number at the beginning and end. '
-    undeterminedNum += 'Put a decimal point on your rating number (X.0) so I can tell!'
+    undeterminedNum = 'Looks like your review has too many integers for me to understand it. '
+    undeterminedNum += 'Put a decimal point on your rating number (X.0) so I can update your review!'
 
     if newUser:
         message = 'Welcome to movieRater! Type \'Help\' to view what you can send me. '

@@ -12,8 +12,8 @@ class User(MongoModel):
 		
 class History(MongoModel):
 	phone = fields.ReferenceField(User)
-	time = fields.DateTimeField()
-	content = fields.CharField()
+	time = fields.DateTimeField(required=True)
+	content = fields.CharField(required=True)
 	
 	class Meta:
 		connection_alias = 'my-atlas-app'
@@ -21,8 +21,10 @@ class History(MongoModel):
 	
 class Review(MongoModel):
 	phone = fields.ReferenceField(User)
-	title = fields.CharField()
-	rating = fields.FloatField(max_value=10, min_value=0)
+	title = fields.CharField(required=True)
+    season = fields.IntegerField()
+    episode = fields.IntegerField()
+	rating = fields.FloatField(required=True, max_value=10, min_value=0)
 	
 	class Meta:
 		connection_alias = 'my-atlas-app'

@@ -3,10 +3,25 @@ from dbClasses import *
 import re
 
 def parseReview(body, review):
-    showPattern1 = r'^(?P<rating>(\d{1,2}|\.\d|\d{1,2}\.\d?))\s+(?P<title>((\w+)(\s+\w+)*))\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s*$' # {rating} {tv show name} {season} {episode}
-    showPattern2 = r'^(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<title>((\w+)(\s+\w+)*))\s+(?P<rating>(\d{1,2}|\.\d|\d{1,2}\.\d?))\s*$' # {season} {episode} {tv show name} {rating}
     
-    showPatterns = [showPattern1, showPattern2]
+    invalidShow1 = r'^\s*(\d{1,2})\s+(\d{1,2})\s+(\d{1,2})\s+((\w+)(\s+\w+)*)\s*$' # {int} {int} {int} {tv show name} -> indecipherable rating,season,episode
+    invalidShow2 = r'^\s*((\w+)(\s+\w+)*)\s+(\d{1,2})\s+(\d{1,2})\s+(\d{1,2})\s*$' # {tv show name} {int} {int} {int} -> indecipherable rating,season,episode
+    invalidShows = [invalidShow1, invalidShow2]
+    for pattern in invalidShows:
+        compiled = re.compile(pattern)
+        match = compiled.match(body)
+        if match is not None:
+            return 'undeterminedNum'
+    
+    
+    showPattern1 = r'^\s*(?P<rating>(\d{1,2}|\.\d|\d{1,2}\.\d?))\s+(?P<title>((\w+)(\s+\w+)*))\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s*$' # {rating} {tv show name} {season} {episode}
+    showPattern2 = r'^\s*(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<title>((\w+)(\s+\w+)*))\s+(?P<rating>(\d{1,2}|\.\d|\d{1,2}\.\d?))\s*$' # {season} {episode} {tv show name} {rating}
+    showPattern3 = r'^\s*(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<rating>(\.\d|\d{1,2}\.\d?))\s+(?P<title>((\w+)(\s+\w+)*))\s*$' # {season} {episode} {rating} {tv show name}
+    showPattern4 = r'^\s*(?P<rating>(\.\d|\d{1,2}\.\d?))\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<title>((\w+)(\s+\w+)*))\s*$' # {rating} {season} {episode} {tv show name}
+    showPattern5 = r'^\s*(?P<title>((\w+)(\s+\w+)*))\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<rating>(\.\d|\d{1,2}\.\d?))\s*$' # {tv show name} {season} {episode} {rating}
+    showPattern6 = r'^\s*(?P<title>((\w+)(\s+\w+)*))\s+(?P<rating>(\.\d|\d{1,2}\.\d?))\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s*$' # {tv show name} {rating} {season} {episode}
+
+    showPatterns = [showPattern1, showPattern2, showPattern3, showPattern4, showPattern5, showPattern6]
     for pattern in showPatterns:
         compiled = re.compile(pattern)
         match = compiled.match(body)
@@ -18,15 +33,15 @@ def parseReview(body, review):
             return 'valid'
             break
     
-    movieNumInName = r'^(\d{1,2})\s+((\w+)(\s+\w+)*)\s+(\d{1,2})\s*$' # {int} {partial movie} {int} -> int in movie & user gave int as a rating
-    numInNameCompiled = re.compile(movieNumInName)
+    invalidMovie = r'^\s*(\d{1,2})\s+((\w+)(\s+\w+)*)\s+(\d{1,2})\s*$' # {int} {partial movie} {int} -> int in movie & user gave int as a rating
+    invalidMovieCompiled = re.compile(invalidMovie)
 
-    match = numInNameCompiled.match(body)
+    match = invalidMovieCompiled.match(body)
     if match is not None:
         return 'undeterminedNum'
     
-    moviePattern1 = r'^(?P<title>((\w+)(\s+\w+)*))\s+(?P<rating>(\d{1,2}|\.\d|\d{1,2}\.\d?))\s*$' # {movie name} {rating}
-    moviePattern2 = r'^(?P<rating>(\d{1,2}|\.\d|\d{1,2}\.\d?))\s+(?P<title>((\w+)(\s+\w+)*))\s*$' # {rating} {movie name}
+    moviePattern1 = r'^\s*(?P<title>((\w+)(\s+\w+)*))\s+(?P<rating>(\d{1,2}|\.\d|\d{1,2}\.\d?))\s*$' # {movie name} {rating}
+    moviePattern2 = r'^\s*(?P<rating>(\d{1,2}|\.\d|\d{1,2}\.\d?))\s+(?P<title>((\w+)(\s+\w+)*))\s*$' # {rating} {movie name}
     patterns = [moviePattern1, moviePattern2]
     for pattern in patterns:
         compiled = re.compile(pattern)
