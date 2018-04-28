@@ -4,8 +4,21 @@ from pymodm import connect
 from dbClasses import *
 from pyClasses import *
 from reviewFunctions import *
+from historyFunctions import *
 from helperFunctions import *
 import logging
+logFormatter = logging.Formatter('%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s] %(message)s')
+rootLogger = logging.getLogger()
+
+fileHandler = logging.FileHandler('errors.log')
+fileHandler.setFormatter(logFormatter)
+rootLogger.addHandler(fileHandler)
+
+consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(logFormatter)
+rootLogger.addHandler(consoleHandler)
+
+#logging.basicConfig(filename='errors.log')
 import consts
 
 connect(
@@ -29,7 +42,7 @@ def hello():
         newUser = False
 
         pyreview = pyReview(textNumber)
-        pyhistory = pyHistory(textNumber, textBody)
+        saveHistory(textNumber, textBody)
 
         users = list(User.objects.raw({'_id': pyreview.phone}))
         if len(users) == 0:
@@ -39,14 +52,17 @@ def hello():
                 firstName=None,
                 lastName=None
             ).save()
+        
+        processState = None
+        queryResults = checkForQuery(textNumber, textBody) # check if user requested info
+        if queryResults is None: #else user is adding/updating a review
+            processState = parseReview(textBody, pyreview)
+            if processState == 'valid':
+                processState = updateAddReview(processState, pyreview)
 
-        processState = parseReview(textBody, pyreview)
-        if processState == 'valid':
-            processState = updateAddReview(processState, pyreview)
-
-        message = determineMessage(pyreview, newUser, processState)
+        message = determineMessage(pyreview, newUser, processState, queryResults)
     except Exception as e:
-        logging.error("error: " + str(e))
+        rootLogger.error(request.values.get('From') + ': ' + request.values.get('Body') + ': ' + str(e))
         message = "Uh oh, I encountered an issue, please try again!"
 
     # Put it in a TwiML response

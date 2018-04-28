@@ -6,3 +6,4 @@ lib/*
 include/*
 ngrok
 pip-selfcheck.json
+*.log

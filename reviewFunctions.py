@@ -1,4 +1,4 @@
-from helperFunctions import isfloat, titleFormat
+from helperFunctions import isfloat, titleFormat, getHelp
 from dbClasses import *
 import re
 
@@ -56,21 +56,81 @@ def parseReview(body, review):
 
 def updateAddReview(parsedState, pyreview):
     if pyreview.rating >= 0 and pyreview.rating <= 10:
-        reviews = list(Review.objects.raw({'phone': pyreview.phone, 'title': pyreview.title}))
-        if len(reviews) == 1 and pyreview.rating != -1:
-             review = reviews[0]
-             review.rating = pyreview.rating
-             review.save()
-             return 'updated'
-        elif pyreview.rating != -1:
+        reviews = list(Review.objects.raw({
+            'phone': pyreview.phone,
+            'title': pyreview.title,
+            'season': pyreview.season,
+            'episode': pyreview.episode
+        }))
+        if len(reviews) == 1:
+            review = reviews[0]
+            review.rating = pyreview.rating
+            review.season = pyreview.season
+            review.episode = pyreview.episode
+            review.save()
+            return 'updated'
+        else:
             review = Review(
-                phone=pyreview.phone,
-                title=pyreview.title,
-                rating=pyreview.rating
+                phone = pyreview.phone,
+                title = pyreview.title,
+                season = pyreview.season,
+                episode = pyreview.episode,
+                rating = pyreview.rating
             ).save()
             return 'new'
     elif pyreview.rating is None or pyreview.rating < 0.0 or pyreview.rating > 10.0:
         return 'ratingErr'
     else:
         return None
-            
+
+def checkForQuery(phone, body):
+    if 'commands' == body.strip().lower():
+        print('IN HERE')
+        return getHelp()
+    
+    # check if user typed in tv show with season/episode to retrieve rating
+    showPattern1 = r'^\s*(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<title>((\w+)(\s+\w+)*))\s*$' # {season} {episode} {tv show name}
+    showPattern2 = r'^\s*(?P<title>((\w+)(\s+\w+)*))\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s*$' # {tv show name} {season} {episode}
+    showPatterns = [showPattern1, showPattern2]
+    for pattern in showPatterns:
+        compiled = re.compile(pattern)
+        match = compiled.match(body)
+        if match is not None:
+            reviews = list(Review.objects.raw({
+                'phone': phone,
+                'title': titleFormat(match.group('title')),
+                'season': int(match.group('season')),
+                'episode': int(match.group('episode'))
+            }))
+            if len(reviews) == 1:
+                title = reviews[0].title
+                rating = reviews[0].rating
+                return 'Your rating for ' + title + ' season ' + match.group('season') + ', episode ' + match.group('episode') + ' is ' + str(rating) + '.'
+    moviePattern = r'^\s*(?P<title>((\w+)(\s+\w+)*))\s*$' # {movie name} or {show name}
+    compiled = re.compile(moviePattern)
+    match = compiled.match(body)
+    if match is not None:
+        reviews = list(Review.objects.raw({
+            'phone': phone,
+            'title': titleFormat(match.group('title')),
+            'season': None,
+            'episode': None
+        }))
+        if len(reviews) == 1:
+            title = reviews[0].title
+            rating = reviews[0].rating
+            return 'Your rating for ' + title + ' is ' + str(rating) + '.'
+        
+        reviews = list(Review.objects.raw({
+            'phone': phone,
+            'title': titleFormat(match.group('title')),
+            'season': { '$exists': True},
+            'episode': { '$exists': True}
+        }))
+        if len(reviews) > 0:
+            sum = 0.0
+            for review in reviews:
+                sum += review.rating
+            average = sum / len(reviews)
+            return 'Your review average for ' + reviews[0].title + ' is ' + str(average) + '.'
+    return None
