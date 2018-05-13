@@ -30,3 +30,10 @@ class Review(MongoModel):
         connection_alias = 'my-atlas-app'
         write_concern = WriteConcern(j=True)
         
+class Average(MongoModel):
+    title = fields.CharField(primary_key=True, required=True)
+    average = fields.FloatField(required=True, max_value=10, min_value=0)
+    
+    class Meta:
+        connection_alias = 'my-atlas-app'
+        write_concern = WriteConcern(j=True)
