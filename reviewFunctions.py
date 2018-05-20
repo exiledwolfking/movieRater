@@ -1,5 +1,7 @@
-from helperFunctions import isfloat, titleFormat, getHelp
+from helperFunctions import isfloat, titleFormat, getHelp, formatReviews
+from datetime import datetime
 from dbClasses import *
+import pymongo
 import re
 
 def parseReview(body, review):
@@ -67,6 +69,7 @@ def updateAddReview(parsedState, pyreview):
             review.rating = pyreview.rating
             review.season = pyreview.season
             review.episode = pyreview.episode
+            review.time = datetime.now()
             review.save()
             return 'updated'
         else:
@@ -75,7 +78,8 @@ def updateAddReview(parsedState, pyreview):
                 title = pyreview.title,
                 season = pyreview.season,
                 episode = pyreview.episode,
-                rating = pyreview.rating
+                rating = pyreview.rating,
+                time= datetime.now()
             ).save()
             return 'new'
     elif pyreview.rating is None or pyreview.rating < 0.0 or pyreview.rating > 10.0:
@@ -87,6 +91,29 @@ def checkForQuery(phone, body):
     if 'commands' == body.strip().lower():
         print('IN HERE')
         return getHelp()
+    # check if user is request previous x reviews
+    toLower = body.lower()
+    lastXPattern = r'^\s*(last)\s+(?P<number>(\d+))(\s+(reviews))?\s*$'
+    previousXPattern = r'^\s*(previous)\s+(?P<number>(\d+))(\s+(reviews))?\s*$'
+    xPatterns = [lastXPattern, previousXPattern]
+    for pattern in xPatterns:
+        compiled = re.compile(pattern)
+        match = compiled.match(toLower)
+        if match is not None and int(match.group('number')) > 20:
+            return 'Sorry, you can only view up to 20 previous reviews.'
+        elif match is not None:
+            qs = Review.objects.raw({
+                'phone': phone
+            })
+            reviews = qs.aggregate(
+                {'$sort': {'time': pymongo.DESCENDING}},
+                {'$limit': int(match.group('number'))}
+            )
+            reviewList = list(reviews)
+            if reviewList:
+                return formatReviews(reviewList)
+            else:
+                return 'You have no previous reviews.'
     
     # check if user typed in tv show with season/episode to retrieve rating
     showPattern1 = r'^\s*(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<title>((\w+)(\s+\w+)*))\s*$' # {season} {episode} {tv show name}
@@ -106,6 +133,8 @@ def checkForQuery(phone, body):
                 title = reviews[0].title
                 rating = reviews[0].rating
                 return 'Your rating for ' + title + ' season ' + match.group('season') + ', episode ' + match.group('episode') + ' is ' + str(rating) + '.'
+    
+    #check if user typed in movie or tv show title for personal tv show average
     moviePattern = r'^\s*(?P<title>((\w+)(\s+\w+)*))\s*$' # {movie name} or {show name}
     compiled = re.compile(moviePattern)
     match = compiled.match(body)

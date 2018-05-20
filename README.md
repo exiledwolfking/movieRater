@@ -18,6 +18,8 @@ ACTIVATE THE VIRTUAL ENVIRONMENT: source bin/activate
 
 INSTALL DEPENDENCIES: bin/pip install -r requirements.txt
 
+INSTALL CRONTAB: pip install python-crontab
+
 INSTALL AND SIGN UP FOR NGROK: https://ngrok.com/download
 
 TO RUN, EXIT THE INSTALLATION CMD, START A NEW COMMAND PROMPT.  NAVIGATE TO THE DIRECTORY: ./runNgrok.sh

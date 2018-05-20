@@ -1,12 +1,15 @@
+#!/usr/bin/python
+
 import consts
 from dbClasses import *
 from pymodm import connect
+import datetime
 
 import logging
 logFormatter = logging.Formatter('%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s] %(message)s')
 rootLogger = logging.getLogger()
 
-fileHandler = logging.FileHandler('cronErrors.log')
+fileHandler = logging.FileHandler('/home/kyle/Documents/movieRater/cronErrors.log')
 fileHandler.setFormatter(logFormatter)
 rootLogger.addHandler(fileHandler)
 
@@ -21,6 +24,8 @@ connect(
 )
 
 try:
+    file = open("/home/kyle/Documents/movieRater/cronLog.txt", "w+")
+    file.write("calculateAverages start: " + datetime.datetime.now().strftime("%d %B %Y %I:%M:%S"))
 
     # calculate movie averages and save
     movieReviews = Review.objects.raw({'season': None, 'episode': None})
@@ -74,11 +79,13 @@ try:
 
     averages = []
     for avg in tvResultsPerUser:
-        print(avg)
         Average(
             title=avg['title'],
             average=avg['totalAvg']
         ).save()
+        
+    file.write("\ncalculateAverages end: " + datetime.datetime.now().strftime("%d %B %Y %I:%M:%S"))
+    file.close()
 
 except Exception as e:
     rootLogger.error('calculateAverages ' + str(e))

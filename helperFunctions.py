@@ -55,3 +55,12 @@ def getHelp():
     message += 'To retrieve a review, enter 1) the name of a show or movie, and 2) '
     message += 'the season followed by the episode if it is a show'
     return message
+
+def formatReviews(reviews):
+    formatted = '\n'
+    for review in reviews:
+        if review['season'] is not None:
+            formatted += review['title'] + ': s' + str(review['season']) + ': e' + str(review['episode']) + ': ' + str(review['rating']) + '\n'
+        else:
+            formatted += review['title'] + ': ' + str(review['rating']) + '\n'
+    return formatted

@@ -25,6 +25,7 @@ class Review(MongoModel):
     season = fields.IntegerField(blank=True)
     episode = fields.IntegerField(blank=True)
     rating = fields.FloatField(required=True, max_value=10, min_value=0)
+    time = fields.DateTimeField(required=True)
 
     class Meta:
         connection_alias = 'my-atlas-app'
