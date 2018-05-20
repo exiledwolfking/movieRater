@@ -24,7 +24,7 @@ connect(
 )
 
 try:
-    file = open("/home/kyle/Documents/movieRater/cronLog.txt", "w+")
+    file = open("/home/kyle/Documents/movieRater/cronLog.log", "w+")
     file.write("calculateAverages start: " + datetime.datetime.now().strftime("%d %B %Y %I:%M:%S"))
 
     # calculate movie averages and save

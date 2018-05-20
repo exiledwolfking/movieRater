@@ -93,8 +93,10 @@ def checkForQuery(phone, body):
         return getHelp()
     # check if user is request previous x reviews
     toLower = body.lower()
-    lastXPattern = r'^\s*(last)\s+(?P<number>(\d+))(\s+(reviews))?\s*$'
-    previousXPattern = r'^\s*(previous)\s+(?P<number>(\d+))(\s+(reviews))?\s*$'
+    if 'previous review' in toLower or 'last review' in toLower:
+        return formatReviewList(phone, 1)
+    lastXPattern = r'^\s*(last)\s+(?P<number>(\d+))((\s+(reviews))|(\s+(review)))?\s*$'
+    previousXPattern = r'^\s*(previous)\s+(?P<number>(\d+))((\s+(reviews))|(\s+(review)))?\s*$'
     xPatterns = [lastXPattern, previousXPattern]
     for pattern in xPatterns:
         compiled = re.compile(pattern)
@@ -102,18 +104,7 @@ def checkForQuery(phone, body):
         if match is not None and int(match.group('number')) > 20:
             return 'Sorry, you can only view up to 20 previous reviews.'
         elif match is not None:
-            qs = Review.objects.raw({
-                'phone': phone
-            })
-            reviews = qs.aggregate(
-                {'$sort': {'time': pymongo.DESCENDING}},
-                {'$limit': int(match.group('number'))}
-            )
-            reviewList = list(reviews)
-            if reviewList:
-                return formatReviews(reviewList)
-            else:
-                return 'You have no previous reviews.'
+            return formatReviewList(phone, int(match.group('number')))
     
     # check if user typed in tv show with season/episode to retrieve rating
     showPattern1 = r'^\s*(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<title>((\w+)(\s+\w+)*))\s*$' # {season} {episode} {tv show name}
@@ -163,3 +154,17 @@ def checkForQuery(phone, body):
             average = sum / len(reviews)
             return 'Your review average for ' + reviews[0].title + ' is ' + str(average) + '.'
     return None
+
+def formatReviewList(phone, limitBy):
+    qs = Review.objects.raw({
+        'phone': phone
+    })
+    reviews = qs.aggregate(
+        {'$sort': {'time': pymongo.DESCENDING}},
+        {'$limit': limitBy}
+    )
+    reviewList = list(reviews)
+    if reviewList:
+        return formatReviews(reviewList)
+    else:
+        return 'You have no previous reviews.'
