@@ -53,7 +53,10 @@ def getHelp():
     message += '(0.0 - 10.0), and 3) the season followed by the episode if it is a show. '
     message += 'You can give these three in any order. '
     message += 'To retrieve a review, enter 1) the name of a show or movie, and 2) '
-    message += 'the season followed by the episode if it is a show'
+    message += 'the season followed by the episode if it is a show. Entering just a tv show '
+    message += 'will retrieve the average of your episode reviews.'
+    message += 'You can also query for "previous X reviews", "last review", "previous review", '
+    message += '"my average of", and "average of".'
     return message
 
 def formatReviews(reviews):

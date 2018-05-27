@@ -106,6 +106,46 @@ def checkForQuery(phone, body):
         elif match is not None:
             return formatReviewList(phone, int(match.group('number')))
     
+    #check if user entered 'my average of ' or 'average of' for personal average or userbase average
+    splitString = body.strip().split()
+    averageOfPattern = r'^\s*(average)\s+(of)\s+(?P<title>((\w+)(\s+\w+)*))\s*$'
+    averageOfMatch = re.compile(averageOfPattern).match(toLower)
+    myAverageOfPattern = r'^\s*(my)\s+(average)\s+(of)\s+(?P<title>((\w+)(\s+\w+)*))\s*$'
+    myAverageOfMatch = re.compile(myAverageOfPattern).match(toLower)
+    if averageOfMatch is not None:
+        averages = list(Average.objects.raw({
+            '_id': titleFormat(averageOfMatch.group('title'))
+        }))
+        if len(averages) == 1:
+            return 'The app review average for ' + averages[0].title + ' is ' + str(averages[0].average) + '.'
+        else:
+            return 'No reviews were found for ' + titleFormat(averageOfMatch.group('title'))
+    elif myAverageOfMatch is not None:
+        reviews = list(Review.objects.raw({
+            'phone': phone,
+            'title': titleFormat(myAverageOfMatch.group('title')),
+            'season': None,
+            'episode': None
+        }))
+        # if a movie, just return review
+        if len(reviews) == 1:
+            title = reviews[0].title
+            rating = reviews[0].rating
+            return 'Your rating for ' + title + ' is ' + str(rating) + '.'
+        
+        reviews = list(Review.objects.raw({
+            'phone': phone,
+            'title': titleFormat(myAverageOfMatch.group('title')),
+            'season': { '$exists': True},
+            'episode': { '$exists': True}
+        }))
+        if len(reviews) > 0:
+            sum = 0.0
+            for review in reviews:
+                sum += review.rating
+            average = sum / len(reviews)
+            return 'Your review average for ' + reviews[0].title + ' is ' + str(average) + '.'
+    
     # check if user typed in tv show with season/episode to retrieve rating
     showPattern1 = r'^\s*(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<title>((\w+)(\s+\w+)*))\s*$' # {season} {episode} {tv show name}
     showPattern2 = r'^\s*(?P<title>((\w+)(\s+\w+)*))\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s*$' # {tv show name} {season} {episode}
