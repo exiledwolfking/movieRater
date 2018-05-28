@@ -106,8 +106,48 @@ def checkForQuery(phone, body):
         elif match is not None:
             return formatReviewList(phone, int(match.group('number')))
     
+    # check if user entered 'delete review X'
+    deleteEpisodePattern1 = r'^\s*(delete)\s+(review)\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<title>((\w+)(\s+\w+)*))\s*$'
+    deleteEpisodePattern2 = r'^\s*(delete)\s+(review)\s+(?P<title>((\w+)(\s+\w+)*))\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s*$'
+    deleteEpisodePattern3 = r'^\s*(delete)\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<title>((\w+)(\s+\w+)*))\s*$'
+    deleteEpisodePattern4 = r'^\s*(delete)\s+(?P<title>((\w+)(\s+\w+)*))\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s*$'
+    deleteEpisodeReviewPatterns = [deleteEpisodePattern1, deleteEpisodePattern3, deleteEpisodePattern2, deleteEpisodePattern4]
+    for pattern in deleteEpisodeReviewPatterns:
+        compiled = re.compile(pattern)
+        match = compiled.match(toLower)
+        if match is not None:
+            numDeleted = Review.objects.raw({
+                'phone': phone,
+                'title': titleFormat(match.group('title')),
+                'season': int(match.group('season')),
+                'episode': int(match.group('episode'))
+            }).delete()
+            if numDeleted != 0:
+                return 'Review for ' + titleFormat(match.group('title')) + ' s: ' + match.group('season') + ' e: ' + match.group('episode') + ' was deleted'
+    
+    
+    deleteReviewPattern = r'^\s*(delete)\s+(review)\s+(?P<title>((\w+)(\s+\w+)*))\s*$'
+    deleteReviewMatch = re.compile(deleteReviewPattern).match(toLower)
+    deletePattern = r'^\s*(delete)\s+(?P<title>((\w+)(\s+\w+)*))\s*$'
+    deleteMatch = re.compile(deletePattern).match(toLower)
+    if deleteReviewMatch is not None:
+        numDeleted = Review.objects.raw({
+            'phone': phone,
+            'title': titleFormat(deleteReviewMatch.group('title'))
+        }).delete()
+        if numDeleted == 0:
+            return 'No reviews were found for ' + titleFormat(deleteReviewMatch.group('title'))
+        else:
+            return 'Review(s) for ' + titleFormat(deleteReviewMatch.group('title')) + ' were deleted'
+    elif deleteMatch is not None:
+        numDeleted = Review.objects.raw({
+            'phone': phone,
+            'title': titleFormat(deleteMatch.group('title'))
+        }).delete()
+        if numDeleted != 0:
+            return 'Review(s) for ' + titleFormat(deleteMatch.group('title')) + ' were deleted'
+    
     #check if user entered 'my average of ' or 'average of' for personal average or userbase average
-    splitString = body.strip().split()
     averageOfPattern = r'^\s*(average)\s+(of)\s+(?P<title>((\w+)(\s+\w+)*))\s*$'
     averageOfMatch = re.compile(averageOfPattern).match(toLower)
     myAverageOfPattern = r'^\s*(my)\s+(average)\s+(of)\s+(?P<title>((\w+)(\s+\w+)*))\s*$'
@@ -121,30 +161,10 @@ def checkForQuery(phone, body):
         else:
             return 'No reviews were found for ' + titleFormat(averageOfMatch.group('title'))
     elif myAverageOfMatch is not None:
-        reviews = list(Review.objects.raw({
-            'phone': phone,
-            'title': titleFormat(myAverageOfMatch.group('title')),
-            'season': None,
-            'episode': None
-        }))
-        # if a movie, just return review
-        if len(reviews) == 1:
-            title = reviews[0].title
-            rating = reviews[0].rating
-            return 'Your rating for ' + title + ' is ' + str(rating) + '.'
-        
-        reviews = list(Review.objects.raw({
-            'phone': phone,
-            'title': titleFormat(myAverageOfMatch.group('title')),
-            'season': { '$exists': True},
-            'episode': { '$exists': True}
-        }))
-        if len(reviews) > 0:
-            sum = 0.0
-            for review in reviews:
-                sum += review.rating
-            average = sum / len(reviews)
-            return 'Your review average for ' + reviews[0].title + ' is ' + str(average) + '.'
+        titleInput = titleFormat(myAverageOfMatch.group('title'))
+        result = getMyAverageOf(phone, titleInput)
+        if result is not None:
+            return result
     
     # check if user typed in tv show with season/episode to retrieve rating
     showPattern1 = r'^\s*(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<title>((\w+)(\s+\w+)*))\s*$' # {season} {episode} {tv show name}
@@ -170,30 +190,37 @@ def checkForQuery(phone, body):
     compiled = re.compile(moviePattern)
     match = compiled.match(body)
     if match is not None:
-        reviews = list(Review.objects.raw({
-            'phone': phone,
-            'title': titleFormat(match.group('title')),
-            'season': None,
-            'episode': None
-        }))
-        if len(reviews) == 1:
-            title = reviews[0].title
-            rating = reviews[0].rating
-            return 'Your rating for ' + title + ' is ' + str(rating) + '.'
-        
-        reviews = list(Review.objects.raw({
-            'phone': phone,
-            'title': titleFormat(match.group('title')),
-            'season': { '$exists': True},
-            'episode': { '$exists': True}
-        }))
-        if len(reviews) > 0:
-            sum = 0.0
-            for review in reviews:
-                sum += review.rating
-            average = sum / len(reviews)
-            return 'Your review average for ' + reviews[0].title + ' is ' + str(average) + '.'
+        titleInput = titleFormat(match.group('title'))
+        result = getMyAverageOf(phone, titleInput)
+        if result is not None:
+            return result
     return None
+
+def getMyAverageOf(phone, titleInput):
+    reviews = list(Review.objects.raw({
+        'phone': phone,
+        'title': titleInput,
+        'season': None,
+        'episode': None
+    }))
+    if len(reviews) == 1:
+        title = reviews[0].title
+        rating = reviews[0].rating
+        return 'Your rating for ' + title + ' is ' + str(rating) + '.'
+
+    reviews = list(Review.objects.raw({
+        'phone': phone,
+        'title': titleInput,
+        'season': { '$exists': True},
+        'episode': { '$exists': True}
+    }))
+    if len(reviews) > 0:
+        sum = 0.0
+        for review in reviews:
+            sum += review.rating
+        average = sum / len(reviews)
+        return 'Your review average for ' + reviews[0].title + ' is ' + str(average) + '.'
+    return None;
 
 def formatReviewList(phone, limitBy):
     qs = Review.objects.raw({
