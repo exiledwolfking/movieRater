@@ -56,7 +56,8 @@ def getHelp():
     message += 'the season followed by the episode if it is a show. Entering just a tv show '
     message += 'will retrieve the average of your episode reviews.'
     message += 'You can also query for "previous X reviews", "last review", "previous review", '
-    message += '"my average of", "average of", and "delete review X".'
+    message += '"my average of", "average of", and "delete review X". To view full documentation '
+    message += 'you can view the project at github.com/exiledwolfking/movieRater/blob/master/ABOUT.md'
     return message
 
 def formatReviews(reviews):

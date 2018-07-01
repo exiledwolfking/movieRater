@@ -6,8 +6,8 @@ import re
 
 def parseReview(body, review):
     
-    invalidShow1 = r'^\s*(\d{1,2})\s+(\d{1,2})\s+(\d{1,2})\s+((\w+)(\s+\w+)*)\s*$' # {int} {int} {int} {tv show name} -> indecipherable rating,season,episode
-    invalidShow2 = r'^\s*((\w+)(\s+\w+)*)\s+(\d{1,2})\s+(\d{1,2})\s+(\d{1,2})\s*$' # {tv show name} {int} {int} {int} -> indecipherable rating,season,episode
+    invalidShow1 = r'^\s*(\d{1,2})\s+(\d{1,2})\s+(\d{1,2})\s+((\S+)(\s+\S+)*)\s*$' # {int} {int} {int} {tv show name} -> indecipherable rating,season,episode
+    invalidShow2 = r'^\s*((\S+)(\s+\S+)*)\s+(\d{1,2})\s+(\d{1,2})\s+(\d{1,2})\s*$' # {tv show name} {int} {int} {int} -> indecipherable rating,season,episode
     invalidShows = [invalidShow1, invalidShow2]
     for pattern in invalidShows:
         compiled = re.compile(pattern)
@@ -16,12 +16,12 @@ def parseReview(body, review):
             return 'undeterminedNum'
     
     
-    showPattern1 = r'^\s*(?P<rating>(\d{1,2}|\.\d|\d{1,2}\.\d?))\s+(?P<title>((\w+)(\s+\w+)*))\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s*$' # {rating} {tv show name} {season} {episode}
-    showPattern2 = r'^\s*(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<title>((\w+)(\s+\w+)*))\s+(?P<rating>(\d{1,2}|\.\d|\d{1,2}\.\d?))\s*$' # {season} {episode} {tv show name} {rating}
-    showPattern3 = r'^\s*(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<rating>(\.\d|\d{1,2}\.\d?))\s+(?P<title>((\w+)(\s+\w+)*))\s*$' # {season} {episode} {rating} {tv show name}
-    showPattern4 = r'^\s*(?P<rating>(\.\d|\d{1,2}\.\d?))\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<title>((\w+)(\s+\w+)*))\s*$' # {rating} {season} {episode} {tv show name}
-    showPattern5 = r'^\s*(?P<title>((\w+)(\s+\w+)*))\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<rating>(\.\d|\d{1,2}\.\d?))\s*$' # {tv show name} {season} {episode} {rating}
-    showPattern6 = r'^\s*(?P<title>((\w+)(\s+\w+)*))\s+(?P<rating>(\.\d|\d{1,2}\.\d?))\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s*$' # {tv show name} {rating} {season} {episode}
+    showPattern1 = r'^\s*(?P<rating>(\d{1,2}|\.\d|\d{1,2}\.\d?))\s+(?P<title>((\S+)(\s+\S+)*))\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s*$' # {rating} {tv show name} {season} {episode}
+    showPattern2 = r'^\s*(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<title>((\S+)(\s+\S+)*))\s+(?P<rating>(\d{1,2}|\.\d|\d{1,2}\.\d?))\s*$' # {season} {episode} {tv show name} {rating}
+    showPattern3 = r'^\s*(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<rating>(\.\d|\d{1,2}\.\d?))\s+(?P<title>((\S+)(\s+\S+)*))\s*$' # {season} {episode} {rating} {tv show name}
+    showPattern4 = r'^\s*(?P<rating>(\.\d|\d{1,2}\.\d?))\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<title>((\S+)(\s+\S+)*))\s*$' # {rating} {season} {episode} {tv show name}
+    showPattern5 = r'^\s*(?P<title>((\S+)(\s+\S+)*))\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<rating>(\.\d|\d{1,2}\.\d?))\s*$' # {tv show name} {season} {episode} {rating}
+    showPattern6 = r'^\s*(?P<title>((\S+)(\s+\S+)*))\s+(?P<rating>(\.\d|\d{1,2}\.\d?))\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s*$' # {tv show name} {rating} {season} {episode}
 
     showPatterns = [showPattern1, showPattern2, showPattern3, showPattern4, showPattern5, showPattern6]
     for pattern in showPatterns:
@@ -35,15 +35,15 @@ def parseReview(body, review):
             return 'valid'
             break
     
-    invalidMovie = r'^\s*(\d{1,2})\s+((\w+)(\s+\w+)*)\s+(\d{1,2})\s*$' # {int} {partial movie} {int} -> int in movie & user gave int as a rating
+    invalidMovie = r'^\s*(\d{1,2})\s+((\S+)(\s+\S+)*)\s+(\d{1,2})\s*$' # {int} {partial movie} {int} -> int in movie & user gave int as a rating
     invalidMovieCompiled = re.compile(invalidMovie)
 
     match = invalidMovieCompiled.match(body)
     if match is not None:
         return 'undeterminedNum'
     
-    moviePattern1 = r'^\s*(?P<title>((\w+)(\s+\w+)*))\s+(?P<rating>(\d{1,2}|\.\d|\d{1,2}\.\d?))\s*$' # {movie name} {rating}
-    moviePattern2 = r'^\s*(?P<rating>(\d{1,2}|\.\d|\d{1,2}\.\d?))\s+(?P<title>((\w+)(\s+\w+)*))\s*$' # {rating} {movie name}
+    moviePattern1 = r'^\s*(?P<title>((\S+)(\s+\S+)*))\s+(?P<rating>(\d{1,2}|\.\d|\d{1,2}\.\d?))\s*$' # {movie name} {rating}
+    moviePattern2 = r'^\s*(?P<rating>(\d{1,2}|\.\d|\d{1,2}\.\d?))\s+(?P<title>((\S+)(\s+\S+)*))\s*$' # {rating} {movie name}
     patterns = [moviePattern1, moviePattern2]
     for pattern in patterns:
         compiled = re.compile(pattern)
@@ -107,10 +107,10 @@ def checkForQuery(phone, body):
             return formatReviewList(phone, int(match.group('number')))
     
     # check if user entered 'delete review X'
-    deleteEpisodePattern1 = r'^\s*(delete)\s+(review)\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<title>((\w+)(\s+\w+)*))\s*$'
-    deleteEpisodePattern2 = r'^\s*(delete)\s+(review)\s+(?P<title>((\w+)(\s+\w+)*))\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s*$'
-    deleteEpisodePattern3 = r'^\s*(delete)\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<title>((\w+)(\s+\w+)*))\s*$'
-    deleteEpisodePattern4 = r'^\s*(delete)\s+(?P<title>((\w+)(\s+\w+)*))\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s*$'
+    deleteEpisodePattern1 = r'^\s*(delete)\s+(review)\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<title>((\S+)(\s+\S+)*))\s*$'
+    deleteEpisodePattern2 = r'^\s*(delete)\s+(review)\s+(?P<title>((\S+)(\s+\S+)*))\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s*$'
+    deleteEpisodePattern3 = r'^\s*(delete)\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<title>((\S+)(\s+\S+)*))\s*$'
+    deleteEpisodePattern4 = r'^\s*(delete)\s+(?P<title>((\S+)(\s+\S+)*))\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s*$'
     deleteEpisodeReviewPatterns = [deleteEpisodePattern1, deleteEpisodePattern3, deleteEpisodePattern2, deleteEpisodePattern4]
     for pattern in deleteEpisodeReviewPatterns:
         compiled = re.compile(pattern)
@@ -126,9 +126,9 @@ def checkForQuery(phone, body):
                 return 'Review for ' + titleFormat(match.group('title')) + ' s: ' + match.group('season') + ' e: ' + match.group('episode') + ' was deleted'
     
     
-    deleteReviewPattern = r'^\s*(delete)\s+(review)\s+(?P<title>((\w+)(\s+\w+)*))\s*$'
+    deleteReviewPattern = r'^\s*(delete)\s+(review)\s+(?P<title>((\S+)(\s+\S+)*))\s*$'
     deleteReviewMatch = re.compile(deleteReviewPattern).match(toLower)
-    deletePattern = r'^\s*(delete)\s+(?P<title>((\w+)(\s+\w+)*))\s*$'
+    deletePattern = r'^\s*(delete)\s+(?P<title>((\S+)(\s+\S+)*))\s*$'
     deleteMatch = re.compile(deletePattern).match(toLower)
     if deleteReviewMatch is not None:
         numDeleted = Review.objects.raw({
@@ -148,9 +148,9 @@ def checkForQuery(phone, body):
             return 'Review(s) for ' + titleFormat(deleteMatch.group('title')) + ' were deleted'
     
     #check if user entered 'my average of ' or 'average of' for personal average or userbase average
-    averageOfPattern = r'^\s*(average)\s+(of)\s+(?P<title>((\w+)(\s+\w+)*))\s*$'
+    averageOfPattern = r'^\s*(average)\s+(of)\s+(?P<title>((\S+)(\s+\S+)*))\s*$'
     averageOfMatch = re.compile(averageOfPattern).match(toLower)
-    myAverageOfPattern = r'^\s*(my)\s+(average)\s+(of)\s+(?P<title>((\w+)(\s+\w+)*))\s*$'
+    myAverageOfPattern = r'^\s*(my)\s+(average)\s+(of)\s+(?P<title>((\S+)(\s+\S+)*))\s*$'
     myAverageOfMatch = re.compile(myAverageOfPattern).match(toLower)
     if averageOfMatch is not None:
         averages = list(Average.objects.raw({
@@ -167,8 +167,8 @@ def checkForQuery(phone, body):
             return result
     
     # check if user typed in tv show with season/episode to retrieve rating
-    showPattern1 = r'^\s*(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<title>((\w+)(\s+\w+)*))\s*$' # {season} {episode} {tv show name}
-    showPattern2 = r'^\s*(?P<title>((\w+)(\s+\w+)*))\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s*$' # {tv show name} {season} {episode}
+    showPattern1 = r'^\s*(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<title>((\S+)(\s+\S+)*))\s*$' # {season} {episode} {tv show name}
+    showPattern2 = r'^\s*(?P<title>((\S+)(\s+\S+)*))\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s*$' # {tv show name} {season} {episode}
     showPatterns = [showPattern1, showPattern2]
     for pattern in showPatterns:
         compiled = re.compile(pattern)
@@ -186,7 +186,7 @@ def checkForQuery(phone, body):
                 return 'Your rating for ' + title + ' season ' + match.group('season') + ', episode ' + match.group('episode') + ' is ' + str(rating) + '.'
     
     #check if user typed in movie or tv show title for personal tv show average
-    moviePattern = r'^\s*(?P<title>((\w+)(\s+\w+)*))\s*$' # {movie name} or {show name}
+    moviePattern = r'^\s*(?P<title>((\S+)(\s+\S+)*))\s*$' # {movie name} or {show name}
     compiled = re.compile(moviePattern)
     match = compiled.match(body)
     if match is not None:
