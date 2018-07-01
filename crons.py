@@ -1,5 +1,6 @@
 from crontab import CronTab
 import logging
+import consts
 logFormatter = logging.Formatter('%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s] %(message)s')
 rootLogger = logging.getLogger()
 
@@ -14,8 +15,9 @@ rootLogger.addHandler(consoleHandler)
 try:
     cron = CronTab(user="kyle")
     cron.remove_all()
-
-    averageJob = cron.new(command="python /home/kyle/Documents/movieRater/calculateAverages.py");
+    
+    commandStr = "python " + consts.PATH + "/calculateAverages.py"
+    averageJob = cron.new(command=commandStr);
     averageJob.minutes.every(5)
     averageJob.enable()
     cron.write()

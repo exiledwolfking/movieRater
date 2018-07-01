@@ -9,7 +9,8 @@ import logging
 logFormatter = logging.Formatter('%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s] %(message)s')
 rootLogger = logging.getLogger()
 
-fileHandler = logging.FileHandler('/home/kyle/Documents/movieRater/cronErrors.log')
+filePath = consts.PATH + "/cronErrors.log"
+fileHandler = logging.FileHandler(filePath)
 fileHandler.setFormatter(logFormatter)
 rootLogger.addHandler(fileHandler)
 
@@ -24,7 +25,8 @@ connect(
 )
 
 try:
-    file = open("/home/kyle/Documents/movieRater/cronLog.log", "w+")
+    logPath = consts.PATH + "/cronLog.log"
+    file = open(logPath, "w+")
     file.write("calculateAverages start: " + datetime.datetime.now().strftime("%d %B %Y %I:%M:%S"))
 
     # calculate movie averages and save
