@@ -13,7 +13,7 @@ consoleHandler.setFormatter(logFormatter)
 rootLogger.addHandler(consoleHandler)
 
 try:
-    cron = CronTab(user="kyle")
+    cron = CronTab(user=consts.CRONUSER)
     cron.remove_all()
     
     commandStr = "python " + consts.PATH + "/calculateAverages.py"

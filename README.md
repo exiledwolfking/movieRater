@@ -8,6 +8,7 @@ https://www.mongodb.com/cloud/atlas
 In consts.py add CONNECTION_STR=<Connection String Here>.  
 In consts.py add PATH=<Path to main project folder>
 For example: "PATH='/home/<userName>/Documents/movieRater'"  
+In consts.py add CRONUSER=<username>
 Since I installed mongod version 3.6.4, my connection string was similar to this: mongodb+srv://<username>:<pswd>@cluster0.mongodb.net/<dbName>
 
 INSTALL TWILIO: pip install twilio OR easy_install twilio
