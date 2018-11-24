@@ -5,31 +5,31 @@ Install mongodb version 3.6+
 Create a file consts.py to hold your mongo server connection string.  I used mongodb atlas:
 https://www.mongodb.com/cloud/atlas
 
-In consts.py add CONNECTION_STR=<Connection String Here>.  
-In consts.py add PATH=<Path to main project folder>
-For example: "PATH='/home/<userName>/Documents/movieRater'"  
-In consts.py add CRONUSER=<username>
+In consts.py add CONNECTION_STR=`<Connection String Here>`.  
+In consts.py add PATH=`<Path to main project folder>`  
+For example: "PATH='/home/`<userName>`/Documents/movieRater'"  
+In consts.py add CRONUSER=`<username>`  
 Since I installed mongod version 3.6.4, my connection string was similar to this: mongodb+srv://<username>:<pswd>@cluster0.mongodb.net/<dbName>
 
-INSTALL TWILIO: pip install twilio OR easy_install twilio
+Install twilio: pip install twilio OR easy_install twilio
 
-INSTALL VIRUALENV: easy_install virtualenv (for python 2.4) OR pip install virtualenv (for python 3.4+) 
+Install virtualenv: easy_install virtualenv (for python 2.4) OR pip install virtualenv (for python 3.4+) 
 
-NAVIGATE TO THE DIRECTORY OF YOUR PROJECT. CREATE A VIRTUAL ENVIRONMENT: virtualenv --no-site-packages .
+Navigate to the directory of your project. Create a virtual environment: virtualenv --no-site-packages .
 
-ACTIVATE THE VIRTUAL ENVIRONMENT: source bin/activate
+Activate the virtual environment: source bin/activate
 
-INSTALL DEPENDENCIES: bin/pip install -r requirements.txt
+Install dependencies: bin/pip install -r requirements.txt
 
-INSTALL CRONTAB: pip install python-crontab
+Install crontab if you wish to run average table cron job: pip install python-crontab
 
-INSTALL AND SIGN UP FOR NGROK: https://ngrok.com/download
+Install and sign up for ngrok: https://ngrok.com/download
 
-TO RUN, EXIT THE INSTALLATION CMD, START A NEW COMMAND PROMPT.  NAVIGATE TO THE DIRECTORY: ./runNgrok.sh
-THIS STARTS NGROK.  COPY THE CONNECTION URL AND PASTE THIS INTO YOUR TWILIO WEBHOOK FOR YOUR NUMBER
+To run, exit the installation terminal, and start a new terminal. Navigate to the directory: ./runNgrok.sh
+This starts ngrok.  Copy the connection url and paste this into your twilio webhook for your number
 
-START A SECOND COMMAND PROMPT: ./run.sh
+Start a new command prompt and run: ./run.sh
 
-OPEN NEW COMMAND PROMPT: pip install python-crontab
-TO RUN CRON JOBS: python crons.py
-VIEW RUNNING CRONS: crontab -l
+Start a new command prompt and run to run the average table cron job: python crons.py
+
+View running crons: crontab -l

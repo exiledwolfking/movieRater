@@ -93,18 +93,48 @@ def checkForQuery(phone, body):
         return getHelp()
     # check if user is request previous x reviews
     toLower = body.lower()
-    if 'previous review' in toLower or 'last review' in toLower:
+    if 'previous reviews' in toLower or 'last reviews' in toLower:
+        return formatReviewList(phone, 20)
+    elif 'previous review' in toLower or 'last review' in toLower:
         return formatReviewList(phone, 1)
+
+    # Check for previous or last requests
     lastXPattern = r'^\s*(last)\s+(?P<number>(\d+))((\s+(reviews))|(\s+(review)))?\s*$'
     previousXPattern = r'^\s*(previous)\s+(?P<number>(\d+))((\s+(reviews))|(\s+(review)))?\s*$'
-    xPatterns = [lastXPattern, previousXPattern]
-    for pattern in xPatterns:
+    prevLastPatterns = [lastXPattern, previousXPattern]
+    for pattern in prevLastPatterns:
         compiled = re.compile(pattern)
         match = compiled.match(toLower)
         if match is not None and int(match.group('number')) > 20:
             return 'Sorry, you can only view up to 20 previous reviews.'
         elif match is not None:
             return formatReviewList(phone, int(match.group('number')))
+    
+    # Check for highest or lowest rating requests
+    highestPattern = r'^\s*highest\s+review\s*$'
+    lowestPattern = r'^\s*lowest\s+review\s*$'
+    if re.compile(highestPattern).match(toLower):
+        return formatReviewList(phone, 1, timeSort=None, scoreSort=pymongo.DESCENDING)
+    elif re.compile(lowestPattern).match(toLower):
+        return formatReviewList(phone, 1, timeSort=None, scoreSort=pymongo.ASCENDING)
+    lowestXPattern = r'^\s*((?P<number>(\d+))\s+)?(lowest)((\s+(reviews))|(\s+(review)))?\s*$'
+    highestXPattern = r'^\s*((?P<number>(\d+))\s+)?(highest)((\s+(reviews))|(\s+(review)))?\s*$'
+    lowHighPatterns = [lowestXPattern, highestXPattern]
+    for pattern in lowHighPatterns:
+        compiled = re.compile(pattern)
+        match = compiled.match(toLower)
+        if match is not None and match.group('number') is not None:
+            if int(match.group('number')) > 20:
+                return 'Sorry, you can only view up to 20 previous reviews.'
+            if highestXPattern == pattern:
+                return formatReviewList(phone, int(match.group('number')), timeSort=None, scoreSort=pymongo.DESCENDING)
+            else:
+                return formatReviewList(phone, int(match.group('number')), timeSort=None, scoreSort=pymongo.ASCENDING)
+        elif match is not None:
+            if highestXPattern == pattern:
+                return formatReviewList(phone, 20, timeSort=None, scoreSort=pymongo.DESCENDING)
+            else:
+                return formatReviewList(phone, 20, timeSort=None, scoreSort=pymongo.ASCENDING)
     
     # check if user entered 'delete review X'
     deleteEpisodePattern1 = r'^\s*(delete)\s+(review)\s+(?P<season>(\d{1,2}))\s+(?P<episode>(\d{1,2}))\s+(?P<title>((\S+)(\s+\S+)*))\s*$'
@@ -222,12 +252,17 @@ def getMyAverageOf(phone, titleInput):
         return 'Your review average for ' + reviews[0].title + ' is ' + str(average) + '.'
     return None;
 
-def formatReviewList(phone, limitBy):
+def formatReviewList(phone, limitBy, timeSort=pymongo.DESCENDING, scoreSort=None):
     qs = Review.objects.raw({
         'phone': phone
     })
+    aggregateSort = None
+    if scoreSort is None:
+        aggregateSort = {'time': timeSort}
+    else:
+        aggregateSort = {'rating': scoreSort}
     reviews = qs.aggregate(
-        {'$sort': {'time': pymongo.DESCENDING}},
+        {'$sort': aggregateSort},
         {'$limit': limitBy}
     )
     reviewList = list(reviews)
