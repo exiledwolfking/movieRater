@@ -18,7 +18,7 @@ try:
     
     commandStr = "python " + consts.PATH + "/calculateAverages.py"
     averageJob = cron.new(command=commandStr);
-    averageJob.every(1).hours
+    averageJob.minutes.every(60)
     averageJob.enable()
     cron.write()
 except Exception as e:
