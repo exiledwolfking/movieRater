@@ -27,7 +27,6 @@ connect(
 )
 
 # The session object makes use of a secret key.
-SECRET_KEY = consts.SECRET_KEY
 app = Flask(__name__)
 app.config.from_object(__name__)
 
