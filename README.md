@@ -33,3 +33,13 @@ Start a new command prompt and run: ./run.sh
 Start a new command prompt and run to run the average table cron job: python crons.py
 
 View running crons: crontab -l
+
+BELOW IN PROGRESS---
+If you want these commands to be run on startup (for example, in case of server restart), you can place
+the three movieRaterOnStartup files in your /etc/init.d folder.
+
+Since the free version of ngrok uses generated urls, an email can be sent to admins on server failure.
+If the "onStartupX" files are used to re-run the commands on startup, then an email will be sent.
+To setup server failure emails (used to email admins the new ngrok tunnel url for twilio):
+
+    Install curl: sudo apt install curl
