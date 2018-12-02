@@ -1,4 +1,4 @@
 #!/bin/bash
 
 # initialize cron jobs
-xterm -hold -e bash python /home/kyle/Documents/movieRater/crons.py
+python3 /home/kyle/Documents/movieRater/crons.py
