@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./ngrok http 5000
+/home/kyle/Documents/movieRater/ngrok http 5000

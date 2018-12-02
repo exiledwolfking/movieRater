@@ -1,4 +1,4 @@
 #!/bin/bash
 
-source bin/activate
-python run.py
+source /home/kyle/Documents/movieRater/bin/activate
+python /home/kyle/Documents/movieRater/run.py
