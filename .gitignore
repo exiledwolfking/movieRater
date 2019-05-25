@@ -7,3 +7,4 @@ include/*
 ngrok
 pip-selfcheck.json
 *.log
+tunnels.json
